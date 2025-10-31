@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { supabase } from './supabaseClient'; // Now imports from .ts
+import { useState } from 'react'; // <--- THIS LINE IS FIXED
+import { supabase } from './supabaseClient'; 
 
 export default function Auth() {
   const [loading, setLoading] = useState<boolean>(false);

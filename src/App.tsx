@@ -2,7 +2,7 @@
 const API_URL = 'https://scriptpolish-server.onrender.com'; // <--- REPLACE THIS
 // -----------------------------------
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'; // <--- THIS LINE IS FIXED
 import { supabase } from './supabaseClient';
 import Auth from './Auth';
 import type { Session } from '@supabase/supabase-js';
@@ -37,7 +37,7 @@ function Navbar({ onSignOut }: { onSignOut: () => void }) {
   );
 }
 
-// --- Script Editor Component (UPDATED) ---
+// --- Script Editor Component (No changes) ---
 function ScriptEditor() {
   const [rawScript, setRawScript] = useState<string>('');
   const [polishedScript, setPolishedScript] = useState<string>('');
@@ -115,16 +115,14 @@ function ScriptEditor() {
     setFinalScript(polishedScript);
   }, [polishedScript]);
 
-  // --- 4. Polish Script Handler (UPDATED) ---
+  // --- 4. Polish Script Handler (No changes) ---
   const handlePolishScript = async () => {
     setIsLoading(true);
     setPolishedScript('');
     setFinalScript('');
 
     try {
-      // --- THIS LINE IS THE ONLY CHANGE ---
-      const response = await fetch(`${API_URL}/polish`, { // It now uses your live Render URL
-      // ------------------------------------
+      const response = await fetch(`${API_URL}/polish`, { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
