@@ -2,24 +2,33 @@
 const API_URL = 'https://scriptpolish-server.onrender.com'; // <--- REPLACE THIS
 // -----------------------------------
 
-import { useState, useEffect } from 'react'; // <--- THIS LINE IS FIXED
+import { useState, useEffect } from 'react';
+import { Routes, Route, Link } from 'react-router-dom'; // <-- Import router components
 import { supabase } from './supabaseClient';
 import Auth from './Auth';
+import FAQ from './FAQ'; // <-- Import our new FAQ page
 import type { Session } from '@supabase/supabase-js';
 
-// --- Navbar Component (No changes) ---
+// --- Navbar Component (UPDATED with Help link) ---
 function Navbar({ onSignOut }: { onSignOut: () => void }) {
-  // ... (code is identical)
   return (
     <nav className="bg-gray-900 shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex-shrink-0 flex items-center">
-            <h1 className="text-2xl font-bold text-white">
+            <Link to="/" className="text-2xl font-bold text-white">
               ScriptPolish AI
-            </h1>
+            </Link>
           </div>
           <div className="flex items-center">
+            {/* NEW: Help Link */}
+            <Link 
+              to="/faq"
+              className="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+            >
+              Help / FAQ
+            </Link>
+            
             <button
               type="button"
               onClick={onSignOut}
@@ -48,7 +57,6 @@ function ScriptEditor() {
   const [isCopied, setIsCopied] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // ... (useEffect for getProfile is identical) ...
   useEffect(() => {
     async function getProfile() {
       try {
@@ -78,7 +86,6 @@ function ScriptEditor() {
     getProfile();
   }, []);
 
-  // ... (useEffect for auto-save is identical) ...
   useEffect(() => {
     if (saveStatus === 'Idle' || saveStatus === 'Saved') {
       return; 
@@ -110,12 +117,10 @@ function ScriptEditor() {
     return () => clearTimeout(timer);
   }, [styleExamples, saveStatus]);
   
-  // ... (useEffect for copy to final is identical) ...
   useEffect(() => {
     setFinalScript(polishedScript);
   }, [polishedScript]);
 
-  // --- 4. Polish Script Handler (No changes) ---
   const handlePolishScript = async () => {
     setIsLoading(true);
     setPolishedScript('');
@@ -133,7 +138,8 @@ function ScriptEditor() {
       if (!response.ok) throw new Error('Something went wrong');
       const data = await response.json();
       setPolishedScript(data.polishedScript);
-    } catch (error: any) {
+    } catch (error: any)
+ {
       console.error('Error polishing script:', error.message);
       setPolishedScript('Error: Could not connect to the AI. Please try again.');
     } finally {
@@ -141,7 +147,6 @@ function ScriptEditor() {
     }
   };
 
-  // ... (handleSaveAndLearn is identical) ...
   const handleSaveAndLearn = () => {
     const separator = `\n\n---\n[New Example Added: ${new Date().toLocaleString()}]\n---\n\n`;
     const newStyleProfile = styleExamples + separator + finalScript;
@@ -149,7 +154,6 @@ function ScriptEditor() {
     setSaveStatus('Saving...');
   };
 
-  // ... (The rest of the component is identical) ...
   return (
     <div className="bg-white rounded-lg shadow-sm">
       <div className="p-4 border-b border-gray-200">
@@ -256,8 +260,7 @@ function ScriptEditor() {
   );
 }
 
-
-// --- Main App Component (No changes) ---
+// --- Main App Component (NOW A ROUTER) ---
 function App() {
   const [session, setSession] = useState<Session | null>(null);
 
@@ -277,22 +280,28 @@ function App() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    setSession(null);
+    // The onAuthStateChange listener will handle setting session to null
   };
 
   return (
-    <div>
-      {!session ? (
-        <Auth />
-      ) : (
-        <div className="min-h-screen bg-gray-100">
-          <Navbar onSignOut={handleSignOut} />
-          <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-            <ScriptEditor key={session.user.id} />
-          </main>
-        </div>
-      )}
-    </div>
+    <Routes>
+      <Route
+        path="/"
+        element={
+          !session ? (
+            <Auth />
+          ) : (
+            <div className="min-h-screen bg-gray-100">
+              <Navbar onSignOut={handleSignOut} />
+              <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+                <ScriptEditor key={session.user.id} />
+              </main>
+            </div>
+          )
+        }
+      />
+      <Route path="/faq" element={<FAQ />} />
+    </Routes>
   );
 }
 
