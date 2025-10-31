@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'; // <--- THIS LINE IS FIXED
+import { Link } from 'react-router-dom';
 
 export default function FAQ() {
   return (
@@ -52,7 +52,7 @@ export default function FAQ() {
             </summary>
             <p className="text-gray-600 mt-4">
               Yes. As long as you are logged in, your "Style Examples" are auto-saved to your secure cloud profile. You can log out, use a different computer, and when you log back in, your voice profile will be there waiting for you.
-            </PC>
+            </p> 
           </details>
 
         </div>
