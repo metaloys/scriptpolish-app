@@ -19,10 +19,12 @@ export default function SettingsPage() {
     }
 
     try {
-      // This is the Supabase function to change a password
-      const { error }_ = await supabase.auth.updateUser({
+      // --- THIS IS THE FIX ---
+      // I removed the stray underscore after { error }
+      const { error } = await supabase.auth.updateUser({
         password: password
       });
+      // ---------------------
 
       if (error) {
         throw error;
@@ -91,8 +93,6 @@ export default function SettingsPage() {
           </div>
         </form>
       </div>
-      
-      {/* We will add the Dark Mode toggle here in the next step */}
       
     </div>
   );
