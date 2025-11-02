@@ -2,7 +2,7 @@
 const API_URL = 'https://scriptpolish-server.onrender.com';
 // -----------------------------------
 
-import { useState, useEffect, useRef } from 'react'; // Added useRef
+import { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import { supabase } from './supabaseClient';
 import Auth from './Auth';
@@ -14,17 +14,14 @@ import { initializePaddle } from '@paddle/paddle-js';
 import type { Paddle } from '@paddle/paddle-js';
 
 // ---================================---
-// --- V4 NAVBAR COMPONENT (FIXED)
+// --- V4 NAVBAR COMPONENT (No changes)
 // ---================================---
 function Navbar({ user, onSignOut }: { user: User, onSignOut: () => void }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null); // For clicking outside
+  const dropdownRef = useRef<HTMLDivElement>(null); 
 
-  // This hook closes the dropdown if you click outside of it
   useEffect(() => {
-    // --- THIS IS THE FIX ---
     function handleClickOutside(event: MouseEvent) { 
-    // ---------------------
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
       }
@@ -39,16 +36,12 @@ function Navbar({ user, onSignOut }: { user: User, onSignOut: () => void }) {
     <nav className="bg-gray-900 shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          {/* Left side: Logo */}
           <div className="flex-shrink-0 flex items-center">
             <Link to="/" className="text-2xl font-bold text-white">
               ScriptPolish AI
             </Link>
           </div>
-
-          {/* Right side: Links & Profile Dropdown */}
           <div className="flex items-center">
-            {/* Main nav links */}
             <div className="hidden md:flex md:items-center md:space-x-4">
               <Link 
                 to="/profile"
@@ -69,8 +62,6 @@ function Navbar({ user, onSignOut }: { user: User, onSignOut: () => void }) {
                 Help / FAQ
               </Link>
             </div>
-            
-            {/* Profile Dropdown */}
             <div className="relative ml-4" ref={dropdownRef}>
               <button
                 type="button"
@@ -78,17 +69,14 @@ function Navbar({ user, onSignOut }: { user: User, onSignOut: () => void }) {
                 className="bg-gray-800 p-1 rounded-full text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
               >
                 <span className="sr-only">Open user menu</span>
-                {/* Simple User Icon */}
                 <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                 </svg>
               </button>
-
-              {/* Dropdown Menu */}
               {isDropdownOpen && (
                 <div 
                   className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 z-10"
-                  onClick={() => setIsDropdownOpen(false)} // Close on click
+                  onClick={() => setIsDropdownOpen(false)}
                 >
                   <div className="px-4 py-2 text-sm text-gray-700 border-b">
                     Signed in as<br/>
@@ -121,6 +109,7 @@ function Navbar({ user, onSignOut }: { user: User, onSignOut: () => void }) {
 // --- V4 PROFILE PAGE COMPONENT (No changes)
 // ---================================---
 function ProfilePage({ user }: { user: User }) {
+  // ... (This component is identical to before)
   const [examples, setExamples] = useState<any[]>([]);
   const [profile, setProfile] = useState<any>(null);
   const [newScriptText, setNewScriptText] = useState<string>('');
@@ -264,17 +253,17 @@ function ProfilePage({ user }: { user: User }) {
 
   return (
     <div className="max-w-4xl mx-auto py-6 space-y-6">
-      <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-xl font-bold text-gray-900">Billing</h2>
+      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Billing</h2>
         {isLoading ? (
-          <p className="mt-2 text-gray-500">Loading subscription status...</p>
+          <p className="mt-2 text-gray-500 dark:text-gray-400">Loading subscription status...</p>
         ) : profile?.subscription_status === 'active' ? (
-          <p className="mt-2 text-lg text-green-700 font-medium">
+          <p className="mt-2 text-lg text-green-700 dark:text-green-400 font-medium">
             Subscription: Active
           </p>
         ) : (
           <div>
-            <p className="mt-2 text-lg text-red-700 font-medium">
+            <p className="mt-2 text-lg text-red-700 dark:text-red-400 font-medium">
               Subscription: Inactive
             </p>
             <button
@@ -288,15 +277,15 @@ function ProfilePage({ user }: { user: User }) {
         )}
       </div>
 
-      <div className="bg-white shadow rounded-lg p-6">
-        <h1 className="text-2xl font-bold text-gray-900">My Voice Profile</h1>
-        <p className="mt-2 text-gray-600">
+      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">My Voice Profile</h1>
+        <p className="mt-2 text-gray-600 dark:text-gray-300">
           This is your "learning engine." Add your best, 100% human-written scripts here.
           After you add or delete scripts, click "Analyze My Voice" to update your AI profile.
         </p>
         
         {profile?.patterns_extracted_at && (
-          <p className="mt-2 text-sm text-green-700">
+          <p className="mt-2 text-sm text-green-700 dark:text-green-400">
             Last analyzed: {new Date(profile.patterns_extracted_at).toLocaleString()}
           </p>
         )}
@@ -308,13 +297,13 @@ function ProfilePage({ user }: { user: User }) {
         >
           {isLoading ? 'Analyzing...' : `Analyze My Voice (${examples.length} Examples)`}
         </button>
-        {status && <p className="mt-2 text-sm text-gray-600">{status}</p>}
+        {status && <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{status}</p>}
       </div>
 
-      <form onSubmit={handleAddScript} className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-lg font-medium text-gray-900">Add a New Script Example</h2>
+      <form onSubmit={handleAddScript} className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+        <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">Add a New Script Example</h2>
         <textarea
-          className="w-full h-48 p-3 mt-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-800"
+          className="w-full h-48 p-3 mt-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
           placeholder="Paste a new, 100% human-written script here..."
           value={newScriptText}
           onChange={(e) => setNewScriptText(e.target.value)}
@@ -328,22 +317,22 @@ function ProfilePage({ user }: { user: User }) {
         </button>
       </form>
 
-      <div className="bg-white shadow rounded-lg">
-        <h2 className="text-lg font-medium text-gray-900 p-6">
+      <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
+        <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100 p-6">
           Your Saved Examples
         </h2>
-        <ul className="divide-y divide-gray-200">
-          {isLoading && <li className="p-4 text-gray-500">Loading examples...</li>}
+        <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+          {isLoading && <li className="p-4 text-gray-500 dark:text-gray-400">Loading examples...</li>}
           {examples.length === 0 && !isLoading && (
-            <li className="p-4 text-gray-500">You have no script examples. Add one above to get started.</li>
+            <li className="p-4 text-gray-500 dark:text-gray-400">You have no script examples. Add one above to get started.</li>
           )}
           {examples.map((example) => (
             <li key={example.id} className="p-4 flex justify-between items-center">
               <div>
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                   Topic: {example.topic_category} (Quality: {example.quality_score})
                 </p>
-                <p className="text-sm text-gray-600 truncate">
+                <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
                   {example.script_text.substring(0, 100)}...
                 </p>
               </div>
@@ -365,6 +354,7 @@ function ProfilePage({ user }: { user: User }) {
 // --- V4 SCRIPT EDITOR COMPONENT (No changes)
 // ---================================---
 function ScriptEditor({ user }: { user: User }) {
+  // ... (This entire component is identical to before)
   const [rawScript, setRawScript] = useState<string>(() => {
     return localStorage.getItem('rawScriptDraft') || '';
   });
@@ -485,17 +475,17 @@ function ScriptEditor({ user }: { user: User }) {
   };
   
   if (profileStatus === 'loading') {
-    return <div className="bg-white shadow rounded-lg p-6 text-center">Loading profile...</div>
+    return <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 text-center">Loading profile...</div>
   }
   
   if (profileStatus === 'missing') {
     return (
-      <div className="bg-white shadow rounded-lg p-6 text-center">
-        <h2 className="text-xl font-bold text-gray-900">Welcome to ScriptPolish AI!</h2>
-        <p className="mt-2 text-gray-600">
+      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 text-center">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Welcome to ScriptPolish AI!</h2>
+        <p className="mt-2 text-gray-600 dark:text-gray-300">
           To get started, you need to create your "Voice Profile."
         </p>
-        <p className="mt-2 text-gray-600">
+        <p className="mt-2 text-gray-600 dark:text-gray-300">
           Please go to your profile page, add 2-3 examples of your best writing, and click "Analyze My Voice."
         </p>
         <Link 
@@ -509,22 +499,22 @@ function ScriptEditor({ user }: { user: User }) {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm">
-      <div className="p-4 border-b border-gray-200">
-        <h2 className="text-xl font-semibold text-gray-800">Polishing Station</h2>
-        <p className="mt-1 text-sm text-gray-600">
+    <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Polishing Station</h2>
+        <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
           Your V4 "Pattern-Matching" Voice Profile is loaded.
         </p>
       </div>
       <div className="p-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div>
-            <label htmlFor="raw-script" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="raw-script" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Raw Script to Polish
             </label>
             <textarea
               id="raw-script"
-              className="w-full h-96 p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 resize-none text-gray-800 bg-gray-50"
+              className="w-full h-96 p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 resize-none"
               placeholder="Paste the script you want to fix here..."
               value={rawScript}
               onChange={(e) => setRawScript(e.target.value)}
@@ -532,7 +522,7 @@ function ScriptEditor({ user }: { user: User }) {
           </div>
           <div>
             <div className="flex justify-between items-center mb-1">
-              <label htmlFor="polished-script" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="polished-script" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Polished Script (Editable)
               </label>
               <button
@@ -552,7 +542,7 @@ function ScriptEditor({ user }: { user: User }) {
             </div>
             <textarea
               id="polished-script"
-              className="w-full h-96 p-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 resize-none text-gray-800 bg-gray-50"
+              className="w-full h-96 p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 resize-none"
               placeholder="Your polished script will appear here..."
               value={finalScript}
               onChange={(e) => setFinalScript(e.target.value)}
@@ -560,7 +550,7 @@ function ScriptEditor({ user }: { user: User }) {
           </div>
         </div>
       </div>
-      <div className="flex justify-between p-4 bg-gray-50 rounded-b-lg border-t border-gray-200">
+      <div className="flex justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-b-lg border-t border-gray-200 dark:border-gray-600">
         <button
           type="button"
           className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
@@ -590,6 +580,17 @@ function App() {
   const [session, setSession] = useState<Session | null>(null);
   const navigate = useNavigate();
 
+  // --- NEW: This is the global theme loader ---
+  // It runs ONCE, before anything else, to prevent "flash of light mode"
+  useEffect(() => {
+    if (localStorage.getItem('theme') === 'dark' || 
+        (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []); // Empty array means it runs only on initial app load
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -611,8 +612,9 @@ function App() {
     await supabase.auth.signOut();
   };
 
+  // Main layout for logged-in users
   const AppLayout = ({ user, children }: { user: User, children: React.ReactNode }) => (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <Navbar user={user} onSignOut={handleSignOut} />
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         {children}
@@ -620,8 +622,9 @@ function App() {
     </div>
   );
 
+  // Layout for public pages
   const PublicLayout = ({ children }: { children: React.ReactNode }) => (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <nav className="bg-gray-900 shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
