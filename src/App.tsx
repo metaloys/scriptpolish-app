@@ -8,7 +8,10 @@ import { supabase } from './supabaseClient';
 import Auth from './Auth';
 import FAQ from './FAQ';
 import type { Session, User } from '@supabase/supabase-js';
-import { initializePaddle, Paddle } from '@paddle/paddle-js'; // <-- 1. IMPORT PADDLE
+
+// --- FIX 1: Split Type and Value Imports ---
+import { initializePaddle } from '@paddle/paddle-js';
+import type { Paddle } from '@paddle/paddle-js'; // 'Paddle' is a type
 
 // ---================================---
 // --- V4 NAVBAR COMPONENT (No changes)
@@ -63,21 +66,18 @@ function ProfilePage({ user }: { user: User }) {
   const [newScriptText, setNewScriptText] = useState<string>('');
   const [status, setStatus] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [paddle, setPaddle] = useState<Paddle | undefined>(); // <-- 2. PADDLE STATE
+  const [paddle, setPaddle] = useState<Paddle | undefined>();
 
-  // --- 3. INITIALIZE PADDLE ON LOAD ---
+  // Initialize Paddle
   useEffect(() => {
-    // This is the Vercel/Vite way to read environment variables
     const paddleClientKey = import.meta.env.VITE_PADDLE_CLIENT_KEY;
-
     if (!paddleClientKey) {
       console.error("Paddle client key is missing. Check .env.local or Vercel variables.");
       return;
     }
-
     initializePaddle({
       token: paddleClientKey,
-      environment: 'production', // Or 'sandbox' if you have a sandbox key
+      environment: 'production',
     }).then((paddleInstance) => {
       if (paddleInstance) {
         setPaddle(paddleInstance);
@@ -85,7 +85,7 @@ function ProfilePage({ user }: { user: User }) {
     });
   }, []);
 
-  // Fetch all existing data on load
+  // Fetch profile data
   useEffect(() => {
     fetchProfileData();
   }, []);
@@ -93,23 +93,21 @@ function ProfilePage({ user }: { user: User }) {
   const fetchProfileData = async () => {
     setIsLoading(true);
     try {
-      // 1. Get the voice examples
+      // 1. Get voice examples
       const { data: examplesData, error: examplesError } = await supabase
         .from('voice_examples')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
-      
       if (examplesError) throw examplesError;
       setExamples(examplesData || []);
 
-      // 2. Get the main profile (to see subscription status)
+      // 2. Get main profile
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('patterns_extracted_at, subscription_status') // <-- Get subscription_status
+        .select('patterns_extracted_at, subscription_status')
         .eq('id', user.id)
         .single();
-      
       if (profileError && profileError.code !== 'PGRST116') {
         throw profileError;
       }
@@ -188,7 +186,7 @@ function ProfilePage({ user }: { user: User }) {
     }
   };
   
-  // --- 4. NEW: HANDLE PADDLE CHECKOUT ---
+  // --- FIX 2: Check for user.email before opening checkout ---
   const handleCheckout = () => {
     const priceId = import.meta.env.VITE_PADDLE_PRICE_ID;
     if (!paddle || !priceId) {
@@ -196,14 +194,16 @@ function ProfilePage({ user }: { user: User }) {
       return;
     }
 
-    // This is the critical part.
-    // We pass 'custom_data' with the user's Supabase ID.
-    // Paddle will send this ID back to us in the webhook.
-    // This is how we link the payment to the user.
+    // This check ensures user.email is a string, not undefined
+    if (!user.email) {
+      alert("Error: Your user email could not be found. Unable to start checkout.");
+      return;
+    }
+
     paddle.Checkout.open({
       items: [{ priceId: priceId, quantity: 1 }],
       customer: {
-        email: user.email,
+        email: user.email, // This is now 100% safe and a valid string
       },
       customData: {
         user_id: user.id,
@@ -214,7 +214,7 @@ function ProfilePage({ user }: { user: User }) {
   return (
     <div className="max-w-4xl mx-auto py-6 space-y-6">
       
-      {/* --- 5. NEW: BILLING SECTION --- */}
+      {/* --- BILLING SECTION --- */}
       <div className="bg-white shadow rounded-lg p-6">
         <h2 className="text-xl font-bold text-gray-900">Billing</h2>
         {isLoading ? (
@@ -239,6 +239,7 @@ function ProfilePage({ user }: { user: User }) {
         )}
       </div>
 
+      {/* ... (Rest of the ProfilePage component is identical) ... */}
       <div className="bg-white shadow rounded-lg p-6">
         <h1 className="text-2xl font-bold text-gray-900">My Voice Profile</h1>
         <p className="mt-2 text-gray-600">
@@ -262,7 +263,6 @@ function ProfilePage({ user }: { user: User }) {
         {status && <p className="mt-2 text-sm text-gray-600">{status}</p>}
       </div>
 
-      {/* ... (Add script form and examples list are identical to before) ... */}
       <form onSubmit={handleAddScript} className="bg-white shadow rounded-lg p-6">
         <h2 className="text-lg font-medium text-gray-900">Add a New Script Example</h2>
         <textarea
@@ -440,10 +440,10 @@ function ScriptEditor({ user }: { user: User }) {
   return (
     <div className="bg-white rounded-lg shadow-sm">
       <div className="p-4 border-b border-gray-200">
-        <h2 className="text-xl font-semibold text-gray-900">Polishing Station</h2>
+        <h2 className="text-xl font-semibold text-gray-800">Polishing Station</h2>
         <p className="mt-1 text-sm text-gray-600">
           Your V4 "Pattern-Matching" Voice Profile is loaded.
-        </p>
+        </D>
       </div>
       <div className="p-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -579,7 +579,6 @@ function App() {
         path="/faq" 
         element={
           // We make the FAQ page accessible even if not logged in
-          // by wrapping it in a simple container
           <div className="min-h-screen bg-gray-100">
             <Navbar onSignOut={handleSignOut} />
             <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
