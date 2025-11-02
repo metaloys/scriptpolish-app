@@ -14,14 +14,13 @@ import { initializePaddle } from '@paddle/paddle-js';
 import type { Paddle } from '@paddle/paddle-js';
 
 // ---================================---
-// --- V4 NAVBAR COMPONENT (UPGRADED)
+// --- V4 NAVBAR COMPONENT (No changes)
 // ---================================---
 function Navbar({ user, onSignOut }: { user: User, onSignOut: () => void }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // <-- NEW state for mobile menu
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // This hook closes the profile dropdown if you click outside of it
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) { 
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -110,7 +109,7 @@ function Navbar({ user, onSignOut }: { user: User, onSignOut: () => void }) {
               )}
             </div>
 
-            {/* --- NEW: Hamburger Menu Button (Mobile) --- */}
+            {/* Hamburger Menu Button (Mobile) */}
             <div className="flex items-center md:hidden ml-4">
               <button
                 type="button"
@@ -119,12 +118,10 @@ function Navbar({ user, onSignOut }: { user: User, onSignOut: () => void }) {
               >
                 <span className="sr-only">Open main menu</span>
                 {isMobileMenuOpen ? (
-                  // Close Icon
                   <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 ) : (
-                  // Hamburger Icon
                   <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
                   </svg>
@@ -136,7 +133,7 @@ function Navbar({ user, onSignOut }: { user: User, onSignOut: () => void }) {
         </div>
       </div>
 
-      {/* --- NEW: Mobile Menu Dropdown --- */}
+      {/* Mobile Menu Dropdown */}
       {isMobileMenuOpen && (
         <div className="md:hidden" id="mobile-menu">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
@@ -169,10 +166,9 @@ function Navbar({ user, onSignOut }: { user: User, onSignOut: () => void }) {
 }
 
 // ---================================---
-// --- V4 PROFILE PAGE COMPONENT (No changes)
+// --- V4 PROFILE PAGE COMPONENT (FIXED)
 // ---================================---
 function ProfilePage({ user }: { user: User }) {
-  // ... (This component is identical to before)
   const [examples, setExamples] = useState<any[]>([]);
   const [profile, setProfile] = useState<any>(null);
   const [newScriptText, setNewScriptText] = useState<string>('');
@@ -390,8 +386,9 @@ function ProfilePage({ user }: { user: User }) {
             <li className="p-4 text-gray-500 dark:text-gray-400">You have no script examples. Add one above to get started.</li>
           )}
           {examples.map((example) => (
-            <li key={example.id} className="p-4 flex justify-between items-center">
-              <div>
+            // --- THIS IS THE FIX ---
+            <li key={example.id} className="p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center">
+              <div className="w-full sm:w-auto">
                 <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                   Topic: {example.topic_category} (Quality: {example.quality_score})
                 </p>
@@ -401,11 +398,12 @@ function ProfilePage({ user }: { user: User }) {
               </div>
               <button
                 onClick={() => handleDeleteScript(example.id)}
-                className="ml-4 px-3 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-md hover:bg-red-200"
+                className="ml-0 sm:ml-4 mt-4 sm:mt-0 px-3 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-md hover:bg-red-200 self-start sm:self-center"
               >
                 Delete
               </button>
             </li>
+            // --- END FIX ---
           ))}
         </ul>
       </div>
@@ -414,10 +412,9 @@ function ProfilePage({ user }: { user: User }) {
 }
 
 // ---================================---
-// --- V4 SCRIPT EDITOR COMPONENT (No changes)
+// --- V4 SCRIPT EDITOR COMPONENT (FIXED)
 // ---================================---
 function ScriptEditor({ user }: { user: User }) {
-  // ... (This entire component is identical to before)
   const [rawScript, setRawScript] = useState<string>(() => {
     return localStorage.getItem('rawScriptDraft') || '';
   });
@@ -570,7 +567,8 @@ function ScriptEditor({ user }: { user: User }) {
         </p>
       </div>
       <div className="p-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* --- THIS IS THE FIX --- */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label htmlFor="raw-script" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Raw Script to Polish
@@ -674,7 +672,6 @@ function App() {
   };
 
   const AppLayout = ({ user, children }: { user: User, children: React.ReactNode }) => (
-    // This div now respects the dark mode class
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <Navbar user={user} onSignOut={handleSignOut} />
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
@@ -684,7 +681,6 @@ function App() {
   );
 
   const PublicLayout = ({ children }: { children: React.ReactNode }) => (
-    // This div now respects the dark mode class
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <nav className="bg-gray-900 shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

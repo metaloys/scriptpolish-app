@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
-import { supabase } from './supabaseClient'; // Import our Supabase client
+import { supabase } from './supabaseClient';
 
-// Define a type for our history items for TypeScript
 type HistoryItem = {
   id: number;
   created_at: string;
   raw_script: string;
   ai_polished_script: string;
-  user_final_script?: string; // This might be null
+  user_final_script?: string;
 };
 
 export default function HistoryPage() {
@@ -16,22 +15,19 @@ export default function HistoryPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // This function runs once when the component loads
     const fetchHistory = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        // 1. Get the current logged-in user
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error('User not found. Please log in again.');
 
-        // 2. Fetch all records from `polish_history` that match this user
         const { data, error } = await supabase
           .from('polish_history')
-          .select('*') // Get all columns
-          .eq('user_id', user.id) // Only get rows for this user
-          .order('created_at', { ascending: false }); // Show newest first
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
 
         if (error) {
           throw error;
@@ -49,7 +45,7 @@ export default function HistoryPage() {
     };
 
     fetchHistory();
-  }, []); // The empty array means this runs once on load
+  }, []);
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -64,43 +60,40 @@ export default function HistoryPage() {
 
       <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
         <div className="p-6">
-          {/* 1. Loading State */}
           {loading && (
             <div className="text-center text-gray-500 dark:text-gray-400">
               Loading history...
             </div>
           )}
 
-          {/* 2. Error State */}
           {error && (
             <div className="text-center text-red-600 dark:text-red-400">
               Error: {error}
             </div>
           )}
 
-          {/* 3. Empty State */}
           {!loading && !error && history.length === 0 && (
             <div className="text-center text-gray-500 dark:text-gray-400">
               You haven't polished any scripts yet.
             </div>
           )}
 
-          {/* 4. History List */}
           {!loading && !error && history.length > 0 && (
             <ul className="divide-y divide-gray-200 dark:divide-gray-700">
               {history.map((item) => (
                 <li key={item.id} className="py-4">
-                  <div className="flex justify-between items-center">
+                  {/* --- THIS IS THE FIX --- */}
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
                     <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
                       Polished on: {new Date(item.created_at).toLocaleString()}
                     </span>
-                    {/* Show a "Learned" badge if you clicked "Save & Learn" */}
                     {item.user_final_script && (
-                      <span className="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                      <span className="mt-2 sm:mt-0 px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded-full self-start">
                         Learned
                       </span>
                     )}
                   </div>
+                  {/* --- END FIX --- */}
                   <details className="mt-2">
                     <summary className="cursor-pointer text-lg font-semibold text-gray-900 dark:text-gray-100">
                       View Raw Script
