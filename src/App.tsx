@@ -17,7 +17,6 @@ import type { Paddle } from '@paddle/paddle-js'; // 'Paddle' is a type
 // --- V4 NAVBAR COMPONENT (No changes)
 // ---================================---
 function Navbar({ onSignOut }: { onSignOut: () => void }) {
-  // ... (This component is identical to before)
   return (
     <nav className="bg-gray-900 shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -58,7 +57,7 @@ function Navbar({ onSignOut }: { onSignOut: () => void }) {
 }
 
 // ---================================---
-// --- V4 PROFILE PAGE COMPONENT (UPDATED)
+// --- V4 PROFILE PAGE COMPONENT (No changes)
 // ---================================---
 function ProfilePage({ user }: { user: User }) {
   const [examples, setExamples] = useState<any[]>([]);
@@ -121,7 +120,6 @@ function ProfilePage({ user }: { user: User }) {
     }
   };
 
-  // ... (handleAddScript, handleDeleteScript, handleAnalyzeVoice are all identical) ...
   const handleAddScript = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newScriptText.trim()) return;
@@ -186,24 +184,20 @@ function ProfilePage({ user }: { user: User }) {
     }
   };
   
-  // --- FIX 2: Check for user.email before opening checkout ---
   const handleCheckout = () => {
     const priceId = import.meta.env.VITE_PADDLE_PRICE_ID;
     if (!paddle || !priceId) {
       alert("Payment system is not ready. Please refresh the page.");
       return;
     }
-
-    // This check ensures user.email is a string, not undefined
     if (!user.email) {
       alert("Error: Your user email could not be found. Unable to start checkout.");
       return;
     }
-
     paddle.Checkout.open({
       items: [{ priceId: priceId, quantity: 1 }],
       customer: {
-        email: user.email, // This is now 100% safe and a valid string
+        email: user.email,
       },
       customData: {
         user_id: user.id,
@@ -213,8 +207,6 @@ function ProfilePage({ user }: { user: User }) {
 
   return (
     <div className="max-w-4xl mx-auto py-6 space-y-6">
-      
-      {/* --- BILLING SECTION --- */}
       <div className="bg-white shadow rounded-lg p-6">
         <h2 className="text-xl font-bold text-gray-900">Billing</h2>
         {isLoading ? (
@@ -239,7 +231,6 @@ function ProfilePage({ user }: { user: User }) {
         )}
       </div>
 
-      {/* ... (Rest of the ProfilePage component is identical) ... */}
       <div className="bg-white shadow rounded-lg p-6">
         <h1 className="text-2xl font-bold text-gray-900">My Voice Profile</h1>
         <p className="mt-2 text-gray-600">
@@ -314,10 +305,9 @@ function ProfilePage({ user }: { user: User }) {
 }
 
 // ---================================---
-// --- V4 SCRIPT EDITOR COMPONENT (No changes)
+// --- V4 SCRIPT EDITOR COMPONENT (FIXED)
 // ---================================---
 function ScriptEditor({ user }: { user: User }) {
-  // ... (This entire component is identical to before)
   const [rawScript, setRawScript] = useState<string>('');
   const [polishedScript, setPolishedScript] = useState<string>('');
   const [finalScript, setFinalScript] = useState<string>('');
@@ -441,9 +431,11 @@ function ScriptEditor({ user }: { user: User }) {
     <div className="bg-white rounded-lg shadow-sm">
       <div className="p-4 border-b border-gray-200">
         <h2 className="text-xl font-semibold text-gray-800">Polishing Station</h2>
+        {/* --- THIS IS THE FIX --- */}
         <p className="mt-1 text-sm text-gray-600">
           Your V4 "Pattern-Matching" Voice Profile is loaded.
-        </D>
+        </p>
+        {/* --- END FIX --- */}
       </div>
       <div className="p-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -578,7 +570,6 @@ function App() {
       <Route 
         path="/faq" 
         element={
-          // We make the FAQ page accessible even if not logged in
           <div className="min-h-screen bg-gray-100">
             <Navbar onSignOut={handleSignOut} />
             <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
