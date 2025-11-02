@@ -7,14 +7,14 @@ import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import { supabase } from './supabaseClient';
 import Auth from './Auth';
 import FAQ from './FAQ';
-import HistoryPage from './HistoryPage'; // <-- NEW IMPORT
-import SettingsPage from './SettingsPage'; // <-- NEW IMPORT
+import HistoryPage from './HistoryPage';
+import SettingsPage from './SettingsPage';
 import type { Session, User } from '@supabase/supabase-js';
 import { initializePaddle } from '@paddle/paddle-js';
 import type { Paddle } from '@paddle/paddle-js';
 
 // ---================================---
-// --- V4 NAVBAR COMPONENT (UPGRADED)
+// --- V4 NAVBAR COMPONENT (FIXED)
 // ---================================---
 function Navbar({ user, onSignOut }: { user: User, onSignOut: () => void }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -22,7 +22,9 @@ function Navbar({ user, onSignOut }: { user: User, onSignOut: () => void }) {
 
   // This hook closes the dropdown if you click outside of it
   useEffect(() => {
-    functionhandleClickOutside(event: MouseEvent) {
+    // --- THIS IS THE FIX ---
+    function handleClickOutside(event: MouseEvent) { 
+    // ---------------------
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
       }
@@ -119,7 +121,6 @@ function Navbar({ user, onSignOut }: { user: User, onSignOut: () => void }) {
 // --- V4 PROFILE PAGE COMPONENT (No changes)
 // ---================================---
 function ProfilePage({ user }: { user: User }) {
-  // ... (This component is identical to before)
   const [examples, setExamples] = useState<any[]>([]);
   const [profile, setProfile] = useState<any>(null);
   const [newScriptText, setNewScriptText] = useState<string>('');
@@ -364,7 +365,6 @@ function ProfilePage({ user }: { user: User }) {
 // --- V4 SCRIPT EDITOR COMPONENT (No changes)
 // ---================================---
 function ScriptEditor({ user }: { user: User }) {
-  // ... (This entire component is identical to before)
   const [rawScript, setRawScript] = useState<string>(() => {
     return localStorage.getItem('rawScriptDraft') || '';
   });
@@ -611,7 +611,6 @@ function App() {
     await supabase.auth.signOut();
   };
 
-  // This is the main "App Shell" for a logged-in user
   const AppLayout = ({ user, children }: { user: User, children: React.ReactNode }) => (
     <div className="min-h-screen bg-gray-100">
       <Navbar user={user} onSignOut={handleSignOut} />
@@ -621,10 +620,8 @@ function App() {
     </div>
   );
 
-  // This is the "Public Shell" for pages like the FAQ
   const PublicLayout = ({ children }: { children: React.ReactNode }) => (
     <div className="min-h-screen bg-gray-100">
-      {/* A version of the navbar for logged-out users, or a simplified one */}
       <nav className="bg-gray-900 shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
@@ -709,7 +706,6 @@ function App() {
       <Route 
         path="/faq" 
         element={
-          // Use the correct layout based on if user is logged in
           !session ? (
             <PublicLayout>
               <FAQ />
