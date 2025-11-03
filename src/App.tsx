@@ -14,9 +14,27 @@ import { initializePaddle } from '@paddle/paddle-js';
 import type { Paddle } from '@paddle/paddle-js';
 
 // ---================================---
-// --- V4 NAVBAR COMPONENT (No changes)
+// --- V5: SECURE API HELPER
+// ---================================---
+const secureFetch = async (url: string, options: RequestInit = {}) => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('User is not authenticated.');
+  const headers = new Headers(options.headers || {});
+  headers.set('Authorization', `Bearer ${session.access_token}`);
+  headers.set('Content-Type', 'application/json');
+  const response = await fetch(url, { ...options, headers: headers });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || 'Something went wrong with the API request.');
+  }
+  return response.json();
+};
+
+// ---================================---
+// --- V4/V5 NAVBAR COMPONENT
 // ---================================---
 function Navbar({ user, onSignOut }: { user: User, onSignOut: () => void }) {
+  // ... (This is the full responsive navbar with hamburger menu)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -39,38 +57,23 @@ function Navbar({ user, onSignOut }: { user: User, onSignOut: () => void }) {
     <nav className="bg-gray-900 shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          {/* Left side: Logo */}
           <div className="flex-shrink-0 flex items-center">
             <Link to="/" className="text-2xl font-bold text-white">
               ScriptPolish AI
             </Link>
           </div>
-
-          {/* Right side: Links & Profile Dropdown */}
           <div className="flex items-center">
-            {/* Main nav links (Desktop) */}
             <div className="hidden md:flex md:items-center md:space-x-4">
-              <Link 
-                to="/profile"
-                className="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-              >
+              <Link to="/profile" className="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
                 My Voice Profile
               </Link>
-              <Link 
-                to="/history"
-                className="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-              >
+              <Link to="/history" className="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
                 History
               </Link>
-              <Link 
-                to="/faq"
-                className="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-              >
+              <Link to="/faq" className="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
                 Help / FAQ
               </Link>
             </div>
-            
-            {/* Profile Dropdown (Desktop) */}
             <div className="relative ml-4" ref={dropdownRef}>
               <button
                 type="button"
@@ -82,7 +85,6 @@ function Navbar({ user, onSignOut }: { user: User, onSignOut: () => void }) {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                 </svg>
               </button>
-
               {isDropdownOpen && (
                 <div 
                   className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 z-10"
@@ -92,24 +94,15 @@ function Navbar({ user, onSignOut }: { user: User, onSignOut: () => void }) {
                     Signed in as<br/>
                     <strong className="truncate block">{user.email}</strong>
                   </div>
-                  <Link 
-                    to="/settings"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
+                  <Link to="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     Settings
                   </Link>
-                  <a
-                    href="#"
-                    onClick={onSignOut}
-                    className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                  >
+                  <a href="#" onClick={onSignOut} className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
                     Sign out
                   </a>
                 </div>
               )}
             </div>
-
-            {/* Hamburger Menu Button (Mobile) */}
             <div className="flex items-center md:hidden ml-4">
               <button
                 type="button"
@@ -128,34 +121,19 @@ function Navbar({ user, onSignOut }: { user: User, onSignOut: () => void }) {
                 )}
               </button>
             </div>
-
           </div>
         </div>
       </div>
-
-      {/* Mobile Menu Dropdown */}
       {isMobileMenuOpen && (
         <div className="md:hidden" id="mobile-menu">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <Link 
-              to="/profile"
-              onClick={closeMobileMenu}
-              className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-            >
+            <Link to="/profile" onClick={closeMobileMenu} className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
               My Voice Profile
             </Link>
-            <Link 
-              to="/history"
-              onClick={closeMobileMenu}
-              className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-            >
+            <Link to="/history" onClick={closeMobileMenu} className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
               History
             </Link>
-            <Link 
-              to="/faq"
-              onClick={closeMobileMenu}
-              className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-            >
+            <Link to="/faq" onClick={closeMobileMenu} className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
               Help / FAQ
             </Link>
           </div>
@@ -166,9 +144,10 @@ function Navbar({ user, onSignOut }: { user: User, onSignOut: () => void }) {
 }
 
 // ---================================---
-// --- V4 PROFILE PAGE COMPONENT (FIXED)
+// --- V4/V5 PROFILE PAGE COMPONENT
 // ---================================---
 function ProfilePage({ user }: { user: User }) {
+  // ... (This is the full component with Paddle, "Analyze" button, etc.)
   const [examples, setExamples] = useState<any[]>([]);
   const [profile, setProfile] = useState<any>(null);
   const [newScriptText, setNewScriptText] = useState<string>('');
@@ -178,18 +157,14 @@ function ProfilePage({ user }: { user: User }) {
 
   useEffect(() => {
     const paddleClientKey = import.meta.env.VITE_PADDLE_CLIENT_KEY;
-    if (!paddleClientKey) {
-      console.error("Paddle client key is missing. Check .env.local or Vercel variables.");
-      return;
+    if (paddleClientKey) {
+      initializePaddle({
+        token: paddleClientKey,
+        environment: 'sandbox', 
+      }).then((paddleInstance) => {
+        if (paddleInstance) setPaddle(paddleInstance);
+      });
     }
-    initializePaddle({
-      token: paddleClientKey,
-      environment: 'sandbox', 
-    }).then((paddleInstance) => {
-      if (paddleInstance) {
-        setPaddle(paddleInstance);
-      }
-    });
   }, []);
 
   useEffect(() => {
@@ -212,11 +187,8 @@ function ProfilePage({ user }: { user: User }) {
         .select('patterns_extracted_at, subscription_status')
         .eq('id', user.id)
         .single();
-      if (profileError && profileError.code !== 'PGRST116') {
-        throw profileError;
-      }
+      if (profileError && profileError.code !== 'PGRST116') throw profileError;
       setProfile(profileData);
-      
     } catch (error: any) {
       console.error('Error fetching profile data:', error.message);
       setStatus(`Error: ${error.message}`);
@@ -259,7 +231,7 @@ function ProfilePage({ user }: { user: User }) {
       setStatus(`Error: ${error.message}`);
     }
   };
-  
+
   const handleAnalyzeVoice = async () => {
     if (examples.length < 2) {
       alert('Please add at least 2 script examples before analyzing.');
@@ -268,16 +240,10 @@ function ProfilePage({ user }: { user: User }) {
     setIsLoading(true);
     setStatus('Analyzing your voice... This may take a moment.');
     try {
-      const response = await fetch(`${API_URL}/analyze-voice`, {
+      const data = await secureFetch(`${API_URL}/analyze-voice`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id }),
+        body: JSON.stringify({}),
       });
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error || 'Analysis failed');
-      }
-      const data = await response.json();
       console.log('Analysis successful:', data.patterns);
       setStatus('Success! Your voice profile has been updated.');
       fetchProfileData();
@@ -288,7 +254,7 @@ function ProfilePage({ user }: { user: User }) {
       setIsLoading(false);
     }
   };
-  
+
   const handleCheckout = () => {
     const priceId = import.meta.env.VITE_PADDLE_PRICE_ID;
     if (!paddle || !priceId) {
@@ -342,13 +308,13 @@ function ProfilePage({ user }: { user: User }) {
           This is your "learning engine." Add your best, 100% human-written scripts here.
           After you add or delete scripts, click "Analyze My Voice" to update your AI profile.
         </p>
-        
+
         {profile?.patterns_extracted_at && (
           <p className="mt-2 text-sm text-green-700 dark:text-green-400">
             Last analyzed: {new Date(profile.patterns_extracted_at).toLocaleString()}
           </p>
         )}
-        
+
         <button
           onClick={handleAnalyzeVoice}
           disabled={isLoading || examples.length < 2}
@@ -386,7 +352,6 @@ function ProfilePage({ user }: { user: User }) {
             <li className="p-4 text-gray-500 dark:text-gray-400">You have no script examples. Add one above to get started.</li>
           )}
           {examples.map((example) => (
-            // --- THIS IS THE FIX ---
             <li key={example.id} className="p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center">
               <div className="w-full sm:w-auto">
                 <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -403,7 +368,6 @@ function ProfilePage({ user }: { user: User }) {
                 Delete
               </button>
             </li>
-            // --- END FIX ---
           ))}
         </ul>
       </div>
@@ -412,7 +376,7 @@ function ProfilePage({ user }: { user: User }) {
 }
 
 // ---================================---
-// --- V4 SCRIPT EDITOR COMPONENT (FIXED)
+// --- V5 SCRIPT EDITOR COMPONENT (w/ V5 Security)
 // ---================================---
 function ScriptEditor({ user }: { user: User }) {
   const [rawScript, setRawScript] = useState<string>(() => {
@@ -422,7 +386,11 @@ function ScriptEditor({ user }: { user: User }) {
   const [finalScript, setFinalScript] = useState<string>(() => {
     return localStorage.getItem('finalScriptDraft') || '';
   });
-  const [historyId, setHistoryId] = useState<number | null>(null);
+  const [historyId, setHistoryId] = useState<number | null>(() => {
+    const savedId = localStorage.getItem('historyId');
+    return savedId ? parseInt(savedId, 10) : null;
+  });
+
   const [profileStatus, setProfileStatus] = useState<'loading' | 'ready' | 'missing'>('loading');
   const [isCopied, setIsCopied] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -449,7 +417,7 @@ function ScriptEditor({ user }: { user: User }) {
     }
     checkProfile();
   }, [user.id]);
-  
+
   useEffect(() => {
     setFinalScript(polishedScript);
   }, [polishedScript]);
@@ -463,12 +431,18 @@ function ScriptEditor({ user }: { user: User }) {
   }, [rawScript]);
 
   useEffect(() => {
-    if (finalScript) {
+    if (finalScript !== polishedScript) {
       localStorage.setItem('finalScriptDraft', finalScript);
-    } else {
-      localStorage.removeItem('finalScriptDraft');
     }
-  }, [finalScript]);
+  }, [finalScript, polishedScript]);
+
+  useEffect(() => {
+    if (historyId) {
+      localStorage.setItem('historyId', historyId.toString());
+    } else {
+      localStorage.removeItem('historyId');
+    }
+  }, [historyId]);
 
   const handlePolishScript = async () => {
     setIsLoading(true);
@@ -476,19 +450,11 @@ function ScriptEditor({ user }: { user: User }) {
     setFinalScript('');
     setHistoryId(null);
     try {
-      const response = await fetch(`${API_URL}/polish`, { 
+      const data = await secureFetch(`${API_URL}/polish`, { 
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          rawScript: rawScript,
-          userId: user.id
-        }),
+        body: JSON.stringify({ rawScript: rawScript }),
       });
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error || 'Something went wrong');
-      }
-      const data = await response.json();
+
       setPolishedScript(data.polishedScript);
       setHistoryId(data.historyId);
     } catch (error: any) {
@@ -506,25 +472,25 @@ function ScriptEditor({ user }: { user: User }) {
     }
     setIsLearning(true);
     try {
-      const response = await fetch(`${API_URL}/save-correction`, {
+      const data = await secureFetch(`${API_URL}/save-correction`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          userId: user.id,
           historyId: historyId,
           aiPolishedScript: polishedScript,
           userFinalScript: finalScript
         }),
       });
-      if (!response.ok) throw new Error('Learning failed');
-      const data = await response.json();
+
       console.log("Learning saved!", data);
-      
+
       setRawScript('');
       setPolishedScript('');
       setFinalScript('');
       setHistoryId(null);
-      
+      localStorage.removeItem('rawScriptDraft');
+      localStorage.removeItem('finalScriptDraft');
+      localStorage.removeItem('historyId');
+
       alert("Success! Your edit has been saved as a new example. Re-analyze your voice on your profile page to include it in future polishes.");
     } catch (error: any) {
       console.error('Error learning from edits:', error.message);
@@ -533,11 +499,11 @@ function ScriptEditor({ user }: { user: User }) {
       setIsLearning(false);
     }
   };
-  
+
   if (profileStatus === 'loading') {
     return <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 text-center">Loading profile...</div>
   }
-  
+
   if (profileStatus === 'missing') {
     return (
       <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 text-center">
@@ -567,7 +533,6 @@ function ScriptEditor({ user }: { user: User }) {
         </p>
       </div>
       <div className="p-4">
-        {/* --- THIS IS THE FIX --- */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label htmlFor="raw-script" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -635,7 +600,7 @@ function ScriptEditor({ user }: { user: User }) {
 
 
 // ---================================---
-// --- V4 MAIN APP (ROUTER)
+// --- V5 MAIN APP (ROUTER)
 // ---================================---
 function App() {
   const [session, setSession] = useState<Session | null>(null);
